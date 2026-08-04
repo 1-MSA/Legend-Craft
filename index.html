@@ -1,0 +1,2030 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Legend Craft — Epic Minecraft Server</title>
+    <meta name="description" content="Legend Craft — A legendary Minecraft server with custom crafting, epic adventures, and a thriving community." />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+    <style>
+        :root {
+            --red-400: #ff4d4d;
+            --red-500: #ff2d2d;
+            --red-600: #e60000;
+            --red-700: #b00020;
+            --red-800: #8b0000;
+            --red-900: #4a0000;
+            --accent-orange: #ff5e00;
+            --bg-dark: #090909;
+            --bg-card: rgba(20, 20, 20, 0.72);
+            --bg-card-hover: rgba(28, 28, 28, 0.85);
+            --border-glow: rgba(255, 70, 70, 0.35);
+            --glow: 0 0 40px rgba(255, 45, 45, 0.5);
+            --text-primary: #ffffff;
+            --text-secondary: #b8b8b8;
+            --font-display: 'Orbitron', sans-serif;
+            --font-body: 'Rajdhani', sans-serif;
+            --radius-sm: 8px;
+            --radius-md: 14px;
+            --radius-lg: 22px;
+            --radius-xl: 28px;
+            --transition-smooth: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            /* Responsive logo sizes */
+            --logo-hero: clamp(200px, 45vw, 680px);
+            --logo-loader: clamp(100px, 28vw, 180px);
+            --logo-nav: clamp(36px, 6vw, 48px);
+            --logo-footer: clamp(32px, 5vw, 40px);
+            --logo-modal: clamp(48px, 10vw, 60px);
+        }
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        html {
+            scroll-behavior: smooth;
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+        }
+        body {
+            font-family: var(--font-body);
+            background: var(--bg-dark);
+            color: var(--text-primary);
+            overflow-x: hidden;
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+        #bg-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            pointer-events: none;
+            opacity: 0.85;
+        }
+        .scroll-progress {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 3px;
+            width: 0%;
+            background: linear-gradient(90deg, var(--red-700), var(--red-400), var(--accent-orange));
+            z-index: 10000;
+            box-shadow: 0 0 20px var(--red-400);
+            border-radius: 0 3px 3px 0;
+            transition: width 0.1s linear;
+        }
+
+        /* ===== LOADING SCREEN ===== */
+        .loader {
+            position: fixed;
+            inset: 0;
+            z-index: 99999;
+            background: #060606;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 2rem;
+            transition: opacity 0.9s ease, visibility 0.9s ease;
+        }
+        .loader.hidden {
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+        }
+        .loader-logo-wrapper {
+            position: relative;
+            width: var(--logo-loader);
+            height: var(--logo-loader);
+            max-width: 90vw;
+            max-height: 90vw;
+            animation: logoFloat 3.5s ease-in-out infinite;
+        }
+        .loader-logo-img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            display: block;
+            filter: drop-shadow(0 0 25px rgba(255, 45, 45, 0.7)) drop-shadow(0 0 60px rgba(200, 0, 30, 0.4));
+            transition: filter 0.4s;
+        }
+        @keyframes logoFloat {
+            0%,
+            100% {
+                transform: translateY(0);
+            }
+            50% {
+                transform: translateY(-18px);
+            }
+        }
+        .loader-text {
+            font-family: var(--font-display);
+            font-size: clamp(0.8rem, 2.5vw, 1.2rem);
+            font-weight: 500;
+            letter-spacing: 0.3em;
+            color: #b8b8b8;
+            text-transform: uppercase;
+            animation: loaderTextPulse 2s ease-in-out infinite;
+            text-align: center;
+        }
+        @keyframes loaderTextPulse {
+            0%,
+            100% {
+                opacity: 0.6;
+            }
+            50% {
+                opacity: 1;
+            }
+        }
+        .loader-bar {
+            width: min(260px, 70vw);
+            height: 5px;
+            background: rgba(255, 45, 45, 0.15);
+            border-radius: 5px;
+            overflow: hidden;
+            box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.6);
+        }
+        .loader-fill {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, #4a0000, #b00020, #ff2d2d, #ff5e00);
+            animation: loadBar 2.5s ease forwards;
+            box-shadow: 0 0 20px var(--red-400), 0 0 40px rgba(255, 45, 45, 0.5);
+            border-radius: 5px;
+        }
+        @keyframes loadBar {
+            to {
+                width: 100%;
+            }
+        }
+
+        /* ===== NAVIGATION ===== */
+        .nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.55rem clamp(0.8rem, 3vw, 3rem);
+            background: rgba(9, 9, 9, 0.7);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            border-bottom: 1px solid rgba(255, 70, 70, 0.2);
+            transition: all 0.4s;
+        }
+        .nav.scrolled {
+            padding: 0.4rem clamp(0.8rem, 3vw, 3rem);
+            background: rgba(9, 9, 9, 0.94);
+            box-shadow: 0 4px 40px rgba(180, 0, 30, 0.3);
+        }
+        .nav-logo {
+            display: flex;
+            align-items: center;
+            gap: 0.55rem;
+            text-decoration: none;
+            color: #fff;
+            font-family: var(--font-display);
+            font-weight: 700;
+            font-size: clamp(0.7rem, 2vw, 1rem);
+            letter-spacing: 0.1em;
+            transition: opacity 0.3s;
+            flex-shrink: 0;
+        }
+        .nav-logo:hover {
+            opacity: 0.85;
+        }
+        .nav-logo-icon {
+            width: var(--logo-nav);
+            height: var(--logo-nav);
+            flex-shrink: 0;
+            animation: logoFloat 5s ease-in-out infinite;
+            filter: drop-shadow(0 0 16px rgba(255, 45, 45, 0.55)) drop-shadow(0 0 30px rgba(200, 0, 30, 0.3));
+        }
+        .nav-logo-icon img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            display: block;
+        }
+        .nav-links {
+            display: flex;
+            gap: clamp(0.8rem, 2.5vw, 2rem);
+            align-items: center;
+            flex-wrap: wrap;
+            justify-content: flex-end;
+        }
+        .nav-links a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-weight: 600;
+            font-size: clamp(0.8rem, 1.8vw, 1rem);
+            transition: color 0.3s;
+            position: relative;
+            white-space: nowrap;
+        }
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            bottom: -3px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: var(--red-400);
+            border-radius: 2px;
+            transition: width 0.35s;
+            box-shadow: 0 0 10px var(--red-400);
+        }
+        .nav-links a:hover {
+            color: #fff;
+        }
+        .nav-links a:hover::after {
+            width: 100%;
+        }
+        .admin-btn {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1.1rem;
+            background: rgba(255, 45, 45, 0.1);
+            border: 1px solid rgba(255, 70, 70, 0.4);
+            border-radius: var(--radius-sm);
+            color: var(--red-400);
+            font-weight: 600;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            animation: adminPulse 3s ease-in-out infinite;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+        .admin-btn:hover {
+            background: rgba(255, 45, 45, 0.25);
+            box-shadow: var(--glow);
+            transform: translateY(-2px);
+            color: #fff;
+        }
+        @keyframes adminPulse {
+            0%,
+            100% {
+                box-shadow: 0 0 0 0 rgba(255, 45, 45, 0.35);
+            }
+            50% {
+                box-shadow: 0 0 0 10px rgba(255, 45, 45, 0);
+            }
+        }
+
+        /* ===== SECTIONS ===== */
+        .section {
+            position: relative;
+            z-index: 1;
+            min-height: 100vh;
+            padding: clamp(5rem, 10vw, 8rem) clamp(1rem, 4vw, 3rem) clamp(3rem, 6vw, 6rem);
+        }
+        .section-header {
+            text-align: center;
+            max-width: 700px;
+            margin: 0 auto 4rem;
+        }
+        .section-tag {
+            font-family: var(--font-display);
+            font-size: 0.8rem;
+            color: var(--red-400);
+            letter-spacing: 0.35em;
+            display: block;
+            margin-bottom: 1rem;
+            text-shadow: 0 0 12px rgba(255, 45, 45, 0.5);
+        }
+        .section-header h2 {
+            font-family: var(--font-display);
+            font-size: clamp(2rem, 5vw, 3.5rem);
+            font-weight: 900;
+            margin-bottom: 1rem;
+            color: #fff;
+        }
+        .gradient-text {
+            background: linear-gradient(135deg, #ff2d2d, #ff5e00, #ff4444);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: gradientShift 4s ease infinite;
+            background-size: 200% 200%;
+        }
+        @keyframes gradientShift {
+            0%,
+            100% {
+                background-position: 0% 50%;
+            }
+            50% {
+                background-position: 100% 50%;
+            }
+        }
+        .section-header p {
+            font-size: clamp(1rem, 2.5vw, 1.2rem);
+            color: var(--text-secondary);
+            opacity: 0.85;
+        }
+
+        /* ===== HERO ===== */
+        .hero {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding-top: clamp(4rem, 8vw, 5rem);
+            gap: clamp(1rem, 3vw, 2rem);
+            flex-wrap: wrap;
+        }
+        .hero-content {
+            flex: 1 1 300px;
+            max-width: 540px;
+            z-index: 2;
+            min-width: 0;
+        }
+        .hero-badge {
+            display: inline-block;
+            padding: 0.4rem 1.3rem;
+            border: 1px solid rgba(255, 70, 70, 0.6);
+            border-radius: 50px;
+            font-family: var(--font-display);
+            font-size: 0.75rem;
+            letter-spacing: 0.22em;
+            color: var(--red-400);
+            margin-bottom: 1.5rem;
+            animation: badgePulse 2s ease-in-out infinite;
+            background: rgba(255, 45, 45, 0.06);
+        }
+        @keyframes badgePulse {
+            0%,
+            100% {
+                box-shadow: 0 0 12px rgba(255, 45, 45, 0.3);
+            }
+            50% {
+                box-shadow: 0 0 28px rgba(255, 45, 45, 0.7);
+            }
+        }
+        .hero-title {
+            font-family: var(--font-display);
+            line-height: 0.9;
+            margin-bottom: 1.5rem;
+        }
+        .title-line {
+            display: block;
+            font-size: clamp(3rem, 8vw, 6.5rem);
+            font-weight: 900;
+            letter-spacing: 0.03em;
+            color: #fff;
+        }
+        .title-accent {
+            background: linear-gradient(135deg, #ff2d2d, #ff5e00, #ff4444);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: titleShimmer 3s ease-in-out infinite;
+            background-size: 200% auto;
+        }
+        @keyframes titleShimmer {
+            0%,
+            100% {
+                background-position: 0% center;
+            }
+            50% {
+                background-position: 200% center;
+            }
+        }
+        .hero-sub {
+            font-size: clamp(1rem, 2.5vw, 1.3rem);
+            color: var(--text-secondary);
+            margin-bottom: 2.5rem;
+            max-width: 460px;
+            opacity: 0.9;
+        }
+        .hero-cta {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            margin-bottom: 3rem;
+        }
+        .btn {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0.9rem 2.2rem;
+            border-radius: var(--radius-md);
+            font-weight: 700;
+            font-size: 1.05rem;
+            text-decoration: none;
+            border: none;
+            cursor: pointer;
+            overflow: hidden;
+            transition: transform 0.3s, box-shadow 0.3s;
+            letter-spacing: 0.03em;
+            white-space: nowrap;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #b00020, #e60000, #b00020);
+            color: #fff;
+            box-shadow: 0 4px 24px rgba(200, 0, 30, 0.45);
+            border: 1px solid rgba(255, 70, 70, 0.3);
+        }
+        .btn-primary:hover {
+            transform: translateY(-4px) scale(1.03);
+            box-shadow: 0 10px 45px rgba(255, 45, 45, 0.65);
+        }
+        .btn-secondary {
+            background: transparent;
+            color: var(--red-400);
+            border: 2px solid rgba(255, 70, 70, 0.55);
+        }
+        .btn-secondary:hover {
+            background: rgba(255, 45, 45, 0.12);
+            transform: translateY(-4px);
+            box-shadow: var(--glow);
+            color: #fff;
+        }
+        .btn-sm {
+            padding: 0.5rem 1rem;
+            font-size: 0.9rem;
+            border-radius: var(--radius-sm);
+        }
+        .btn-full {
+            width: 100%;
+        }
+        .hero-stats {
+            display: flex;
+            gap: clamp(1rem, 4vw, 2.8rem);
+            flex-wrap: wrap;
+        }
+        .stat {
+            display: flex;
+            flex-direction: column;
+        }
+        .stat-num {
+            font-family: var(--font-display);
+            font-size: clamp(1.5rem, 4vw, 2.2rem);
+            font-weight: 900;
+            color: var(--red-400);
+            text-shadow: 0 0 20px rgba(255, 45, 45, 0.5);
+        }
+        .stat-label {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            opacity: 0.75;
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
+        }
+
+        /* ===== HERO LOGO IMAGE ===== */
+        .hero-logo-wrapper {
+            flex: 1 1 280px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 0;
+            max-width: 100%;
+            position: relative;
+        }
+        .hero-logo-container {
+            width: var(--logo-hero);
+            height: var(--logo-hero);
+            max-width: 90vw;
+            max-height: 90vw;
+            aspect-ratio: 1/1;
+            animation: logoFloat 6s ease-in-out infinite;
+            filter: drop-shadow(0 0 80px rgba(255, 45, 45, 0.6)) drop-shadow(0 0 160px rgba(200, 0, 30, 0.4)) drop-shadow(0 25px 55px rgba(0, 0, 0, 0.8));
+            cursor: default;
+            transition: filter 0.7s, transform 0.7s;
+        }
+        .hero-logo-container:hover {
+            filter: drop-shadow(0 0 110px rgba(255, 45, 45, 0.85)) drop-shadow(0 0 220px rgba(255, 94, 0, 0.55)) drop-shadow(0 35px 75px rgba(0, 0, 0, 0.9));
+            transform: scale(1.04);
+        }
+        .hero-logo-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            display: block;
+        }
+
+        .scroll-hint {
+            position: absolute;
+            bottom: 2rem;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--red-400);
+            font-size: 0.85rem;
+            letter-spacing: 0.16em;
+            animation: hintBounce 2s ease-in-out infinite;
+            z-index: 5;
+        }
+        .scroll-arrow {
+            width: 22px;
+            height: 22px;
+            border-right: 2px solid var(--red-400);
+            border-bottom: 2px solid var(--red-400);
+            transform: rotate(45deg);
+        }
+        @keyframes hintBounce {
+            0%,
+            100% {
+                transform: translateX(-50%) translateY(0);
+            }
+            50% {
+                transform: translateX(-50%) translateY(12px);
+            }
+        }
+
+        /* ===== ABOUT ===== */
+        .about-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 2rem;
+            max-width: 1200px;
+            margin: 0 auto 4rem;
+        }
+        .about-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-glow);
+            border-radius: var(--radius-lg);
+            padding: 2rem;
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            transition: transform 0.4s, box-shadow 0.4s;
+            position: relative;
+            overflow: hidden;
+        }
+        .about-card:hover {
+            transform: translateY(-12px);
+            box-shadow: 0 24px 60px rgba(180, 0, 30, 0.35), var(--glow);
+            border-color: rgba(255, 70, 70, 0.6);
+            background: var(--bg-card-hover);
+        }
+        .card-icon {
+            font-size: 2.8rem;
+            margin-bottom: 1rem;
+            display: inline-block;
+            animation: iconBounce 3s ease-in-out infinite;
+        }
+        @keyframes iconBounce {
+            0%,
+            100% {
+                transform: translateY(0);
+            }
+            50% {
+                transform: translateY(-10px);
+            }
+        }
+        .about-card h3 {
+            font-family: var(--font-display);
+            font-size: 1.2rem;
+            margin-bottom: 0.75rem;
+            color: var(--red-400);
+        }
+        .about-card p {
+            color: var(--text-secondary);
+            opacity: 0.85;
+            font-size: 0.95rem;
+        }
+        .server-ip {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+            padding: 1.5rem 2rem;
+            background: rgba(20, 20, 20, 0.8);
+            border: 2px solid rgba(255, 70, 70, 0.45);
+            border-radius: var(--radius-lg);
+            max-width: 520px;
+            margin: 0 auto;
+            animation: ipGlow 3s ease-in-out infinite;
+            backdrop-filter: blur(10px);
+            flex-wrap: wrap;
+        }
+        @keyframes ipGlow {
+            0%,
+            100% {
+                box-shadow: 0 0 20px rgba(200, 0, 30, 0.25);
+            }
+            50% {
+                box-shadow: 0 0 45px rgba(255, 45, 45, 0.55);
+            }
+        }
+        .ip-label {
+            font-family: var(--font-display);
+            font-size: 0.75rem;
+            letter-spacing: 0.22em;
+            color: var(--red-400);
+        }
+        .ip-address {
+            font-family: var(--font-display);
+            font-size: clamp(0.9rem, 3vw, 1.3rem);
+            color: #fff;
+            background: none;
+            border: none;
+            word-break: break-all;
+            text-align: center;
+        }
+        .copy-btn {
+            background: rgba(255, 45, 45, 0.15);
+            border: 1px solid rgba(255, 70, 70, 0.5);
+            border-radius: var(--radius-sm);
+            padding: 0.5rem 0.7rem;
+            cursor: pointer;
+            font-size: 1.2rem;
+            transition: all 0.3s;
+            color: #fff;
+            flex-shrink: 0;
+        }
+        .copy-btn:hover {
+            background: var(--red-700);
+            transform: scale(1.1);
+            box-shadow: var(--glow);
+        }
+
+        /* ===== VIDEOS ===== */
+        .video-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+            max-width: 1200px;
+            margin: 0 auto 3rem;
+        }
+        .video-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-glow);
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+            transition: transform 0.4s, box-shadow 0.4s;
+            backdrop-filter: blur(10px);
+        }
+        .video-card:hover {
+            transform: translateY(-10px) scale(1.03);
+            box-shadow: 0 28px 55px rgba(180, 0, 30, 0.4);
+        }
+        .video-thumb {
+            aspect-ratio: 16/9;
+            overflow: hidden;
+        }
+        .video-placeholder {
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #1a0000, #2d0000);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+        .play-btn {
+            width: 72px;
+            height: 72px;
+            background: rgba(200, 0, 30, 0.85);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.6rem;
+            color: #fff;
+            animation: playPulse 2s ease-in-out infinite;
+            box-shadow: 0 0 30px rgba(255, 45, 45, 0.5);
+        }
+        @keyframes playPulse {
+            0%,
+            100% {
+                box-shadow: 0 0 0 0 rgba(255, 45, 45, 0.5);
+            }
+            50% {
+                box-shadow: 0 0 0 22px rgba(255, 45, 45, 0);
+            }
+        }
+        .video-card h3 {
+            font-family: var(--font-display);
+            padding: 1.25rem 1.25rem 0.5rem;
+            font-size: 1.1rem;
+            color: #fff;
+        }
+        .video-card p {
+            padding: 0 1.25rem 1.25rem;
+            color: var(--text-secondary);
+            opacity: 0.8;
+        }
+        .youtube-banner {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 2rem;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2rem 2.5rem;
+            background: linear-gradient(135deg, rgba(200, 0, 0, 0.12), rgba(30, 0, 0, 0.4));
+            border: 1px solid rgba(255, 0, 0, 0.35);
+            border-radius: var(--radius-lg);
+            flex-wrap: wrap;
+        }
+        .yt-content {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+            flex-wrap: wrap;
+        }
+        .yt-content h3 {
+            font-family: var(--font-display);
+            color: #fff;
+        }
+        .yt-content p {
+            color: var(--text-secondary);
+            opacity: 0.8;
+        }
+
+        /* ===== CRAFTING ===== */
+        .crafting-filters {
+            display: flex;
+            justify-content: center;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+            margin-bottom: 3rem;
+        }
+        .filter-btn {
+            padding: 0.6rem 1.6rem;
+            background: rgba(30, 30, 30, 0.6);
+            border: 1px solid rgba(255, 70, 70, 0.3);
+            border-radius: 50px;
+            color: var(--text-secondary);
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 0.9rem;
+            white-space: nowrap;
+        }
+        .filter-btn:hover,
+        .filter-btn.active {
+            background: var(--red-700);
+            border-color: var(--red-400);
+            color: #fff;
+            box-shadow: var(--glow);
+        }
+        .recipes-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 2rem;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        .recipe-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-glow);
+            border-radius: var(--radius-lg);
+            padding: 1.5rem;
+            transition: transform 0.4s, box-shadow 0.4s;
+            backdrop-filter: blur(10px);
+        }
+        .recipe-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 22px 55px rgba(180, 0, 30, 0.45), var(--glow);
+            border-color: rgba(255, 70, 70, 0.6);
+        }
+        .recipe-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+        .recipe-icon {
+            font-size: 2.5rem;
+            width: 60px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255, 45, 45, 0.12);
+            border-radius: var(--radius-md);
+            border: 1px solid rgba(255, 70, 70, 0.35);
+        }
+        .recipe-info h3 {
+            font-family: var(--font-display);
+            font-size: 1.1rem;
+            color: #fff;
+        }
+        .recipe-category {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.16em;
+            color: var(--red-400);
+        }
+        .recipe-desc {
+            color: var(--text-secondary);
+            opacity: 0.8;
+            font-size: 0.9rem;
+            margin-bottom: 1.25rem;
+        }
+        .recipe-craft {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        .craft-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 40px);
+            gap: 4px;
+            background: rgba(0, 0, 0, 0.5);
+            padding: 8px;
+            border-radius: var(--radius-sm);
+            border: 2px solid #444;
+        }
+        .craft-slot {
+            width: 40px;
+            height: 40px;
+            background: #6b6b6b;
+            border: 2px solid #2a2a2a;
+            border-radius: 3px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.55rem;
+            color: #fff;
+            text-align: center;
+            padding: 2px;
+        }
+        .craft-slot.filled {
+            background: linear-gradient(135deg, #8b0000, #b00020);
+            border-color: #4a0000;
+        }
+        .craft-arrow {
+            font-size: 1.5rem;
+            color: var(--red-400);
+            animation: arrowPulse 1.5s ease-in-out infinite;
+        }
+        @keyframes arrowPulse {
+            0%,
+            100% {
+                transform: translateX(0);
+                opacity: 0.7;
+            }
+            50% {
+                transform: translateX(6px);
+                opacity: 1;
+            }
+        }
+        .craft-result {
+            width: 58px;
+            height: 58px;
+            background: rgba(255, 45, 45, 0.15);
+            border: 2px solid rgba(255, 70, 70, 0.6);
+            border-radius: var(--radius-sm);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            animation: resultGlow 2s ease-in-out infinite;
+        }
+        @keyframes resultGlow {
+            0%,
+            100% {
+                box-shadow: 0 0 10px rgba(255, 45, 45, 0.3);
+            }
+            50% {
+                box-shadow: 0 0 28px rgba(255, 45, 45, 0.7);
+            }
+        }
+        .craft-result span {
+            font-size: 0.5rem;
+            color: var(--text-secondary);
+        }
+
+        /* ===== COMMUNITY ===== */
+        .community-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        .community-card {
+            display: block;
+            text-decoration: none;
+            color: inherit;
+            background: var(--bg-card);
+            border: 1px solid var(--border-glow);
+            border-radius: var(--radius-xl);
+            padding: 3rem 2rem;
+            text-align: center;
+            transition: transform 0.4s, box-shadow 0.4s;
+            backdrop-filter: blur(12px);
+        }
+        .community-card:hover {
+            transform: translateY(-14px);
+            box-shadow: 0 32px 65px rgba(180, 0, 30, 0.5);
+        }
+        .discord-card:hover {
+            border-color: #5865F2;
+            box-shadow: 0 32px 65px rgba(88, 101, 242, 0.35);
+        }
+        .youtube-card:hover {
+            border-color: #ff0000;
+            box-shadow: 0 32px 65px rgba(255, 0, 0, 0.3);
+        }
+        .community-icon {
+            margin-bottom: 1.5rem;
+        }
+        .community-card h3 {
+            font-family: var(--font-display);
+            font-size: 1.5rem;
+            margin-bottom: 0.75rem;
+            color: #fff;
+        }
+        .community-card p {
+            color: var(--text-secondary);
+            opacity: 0.85;
+            margin-bottom: 1.5rem;
+        }
+        .community-cta {
+            font-weight: 700;
+            color: var(--red-400);
+        }
+
+        /* ===== DEVELOPERS ===== */
+        .dev-categories {
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+        .dev-category-title {
+            font-family: var(--font-display);
+            font-size: 1.3rem;
+            color: var(--red-400);
+            margin: 2rem 0 1.5rem;
+            text-align: center;
+        }
+        .dev-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+        .dev-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-glow);
+            border-radius: var(--radius-lg);
+            padding: 2rem;
+            text-align: center;
+            transition: transform 0.4s, box-shadow 0.4s;
+        }
+        .dev-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 22px 55px rgba(180, 0, 30, 0.4);
+        }
+        .dev-avatar {
+            font-size: 3.2rem;
+            margin-bottom: 1rem;
+            animation: avatarFloat 4s ease-in-out infinite;
+        }
+        @keyframes avatarFloat {
+            0%,
+            100% {
+                transform: translateY(0);
+            }
+            50% {
+                transform: translateY(-12px);
+            }
+        }
+        .dev-card h4 {
+            font-family: var(--font-display);
+            font-size: 1.2rem;
+            color: #fff;
+        }
+        .dev-role {
+            display: inline-block;
+            font-size: 0.8rem;
+            color: var(--red-400);
+            text-transform: uppercase;
+            letter-spacing: 0.16em;
+            margin-bottom: 0.75rem;
+        }
+        .dev-card p {
+            color: var(--text-secondary);
+            opacity: 0.8;
+            font-size: 0.95rem;
+        }
+
+        /* ===== FOOTER ===== */
+        .footer {
+            padding: 3rem clamp(1rem, 3vw, 3rem);
+            border-top: 1px solid rgba(255, 70, 70, 0.2);
+            background: rgba(9, 9, 9, 0.85);
+            backdrop-filter: blur(12px);
+        }
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 1.5rem;
+        }
+        .footer-brand {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-family: var(--font-display);
+            font-weight: 700;
+            letter-spacing: 0.14em;
+            color: #fff;
+            font-size: clamp(0.8rem, 2vw, 1rem);
+        }
+        .footer-logo-icon {
+            width: var(--logo-footer);
+            height: var(--logo-footer);
+            flex-shrink: 0;
+            filter: drop-shadow(0 0 10px rgba(255, 45, 45, 0.5));
+        }
+        .footer-logo-icon img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            display: block;
+        }
+        .footer-copy {
+            color: var(--text-secondary);
+            opacity: 0.6;
+            font-size: 0.9rem;
+            text-align: center;
+        }
+        .footer-links a {
+            color: var(--red-400);
+            text-decoration: none;
+            font-weight: 600;
+            margin-left: 1.5rem;
+            transition: color 0.3s;
+        }
+        .footer-links a:hover {
+            color: #fff;
+        }
+
+        /* ===== MODALS ===== */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 10000;
+            background: rgba(6, 6, 6, 0.88);
+            backdrop-filter: blur(14px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.4s;
+            padding: 1rem;
+        }
+        .modal-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+        .modal {
+            background: linear-gradient(160deg, rgba(20, 20, 20, 0.97), rgba(10, 0, 0, 0.98));
+            border: 1px solid rgba(255, 70, 70, 0.45);
+            border-radius: var(--radius-xl);
+            padding: 2.5rem clamp(1.5rem, 4vw, 2.5rem);
+            max-width: 500px;
+            width: 100%;
+            position: relative;
+            transform: scale(0.9) translateY(20px);
+            transition: transform 0.4s;
+            box-shadow: 0 30px 80px rgba(180, 0, 30, 0.5);
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        .modal-overlay.active .modal {
+            transform: scale(1) translateY(0);
+        }
+        .recipe-edit-modal {
+            max-width: 620px;
+        }
+        .modal-close {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: none;
+            border: none;
+            color: var(--red-400);
+            font-size: 2rem;
+            cursor: pointer;
+            transition: transform 0.3s;
+            z-index: 5;
+        }
+        .modal-close:hover {
+            transform: rotate(90deg);
+            color: #fff;
+        }
+        .modal-dragon-icon {
+            width: var(--logo-modal);
+            height: var(--logo-modal);
+            margin: 0 auto 1rem;
+            filter: drop-shadow(0 0 15px rgba(255, 45, 45, 0.5));
+            max-width: 80px;
+            max-height: 80px;
+        }
+        .modal-dragon-icon img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            display: block;
+        }
+        .modal h2 {
+            font-family: var(--font-display);
+            text-align: center;
+            margin-bottom: 0.5rem;
+            color: #fff;
+            font-size: clamp(1.2rem, 3vw, 1.5rem);
+        }
+        .modal>p {
+            text-align: center;
+            color: var(--text-secondary);
+            opacity: 0.8;
+            margin-bottom: 1.5rem;
+        }
+        .form-group {
+            margin-bottom: 1.25rem;
+        }
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 0.4rem;
+            color: #ccc;
+            font-size: 0.9rem;
+        }
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 0.8rem 1rem;
+            background: rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(255, 70, 70, 0.35);
+            border-radius: var(--radius-md);
+            color: #fff;
+            font-family: var(--font-body);
+            font-size: 1rem;
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: var(--red-400);
+            box-shadow: 0 0 20px rgba(255, 45, 45, 0.35);
+            background: rgba(20, 0, 0, 0.6);
+        }
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+        .login-error {
+            color: #ff5e5e;
+            font-size: 0.9rem;
+            text-align: center;
+            min-height: 1.2rem;
+            margin-bottom: 0.5rem;
+        }
+        .craft-grid-editor {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 6px;
+            background: rgba(0, 0, 0, 0.6);
+            padding: 12px;
+            border-radius: var(--radius-sm);
+            border: 2px solid #444;
+            max-width: 240px;
+        }
+        .grid-slot {
+            width: 100%;
+            aspect-ratio: 1;
+            background: #6b6b6b;
+            border: 2px solid #2a2a2a;
+            border-radius: 4px;
+            text-align: center;
+            font-size: 0.7rem;
+            color: #fff;
+            padding: 4px;
+            transition: border-color 0.2s;
+        }
+        .grid-slot:focus {
+            border-color: var(--red-400);
+            background: #6b0000;
+            outline: none;
+        }
+        .form-actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-end;
+            margin-top: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        /* ===== ADMIN PANEL ===== */
+        .admin-panel {
+            position: fixed;
+            top: 0;
+            right: -450px;
+            width: min(420px, 100vw);
+            height: 100vh;
+            z-index: 9000;
+            background: linear-gradient(180deg, rgba(20, 5, 5, 0.98), rgba(6, 6, 6, 0.99));
+            border-left: 1px solid rgba(255, 70, 70, 0.45);
+            box-shadow: -10px 0 55px rgba(180, 0, 30, 0.5);
+            transition: right 0.5s;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            backdrop-filter: blur(16px);
+        }
+        .admin-panel.active {
+            right: 0;
+        }
+        .admin-panel-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid rgba(255, 70, 70, 0.25);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+        .admin-panel-header h2 {
+            font-family: var(--font-display);
+            font-size: 1.1rem;
+            color: var(--red-400);
+        }
+        .admin-recipes-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 1rem;
+        }
+        .admin-recipe-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1rem;
+            background: rgba(255, 45, 45, 0.07);
+            border: 1px solid rgba(255, 70, 70, 0.2);
+            border-radius: var(--radius-md);
+            margin-bottom: 0.75rem;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+        .admin-recipe-item:hover {
+            background: rgba(255, 45, 45, 0.16);
+        }
+        .admin-recipe-info {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        .admin-recipe-info h4 {
+            font-size: 0.95rem;
+            color: #fff;
+        }
+        .admin-recipe-info small {
+            color: var(--red-400);
+            font-size: 0.75rem;
+            text-transform: uppercase;
+        }
+        .btn-edit {
+            background: rgba(255, 45, 45, 0.25);
+            color: #fff;
+            padding: 0.35rem 0.6rem;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.8rem;
+        }
+        .btn-delete {
+            background: rgba(255, 80, 80, 0.2);
+            color: #ff6b6b;
+            padding: 0.35rem 0.6rem;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.8rem;
+        }
+        body.admin-mode .admin-btn {
+            background: var(--red-700);
+            color: #fff;
+            animation: none;
+        }
+
+        /* ===== REVEAL ===== */
+        .reveal-up,
+        .reveal-left,
+        .reveal-right {
+            opacity: 0;
+        }
+        .reveal-up.revealed {
+            animation: revealUp 0.8s ease forwards;
+        }
+        .reveal-left.revealed {
+            animation: revealLeft 0.8s ease forwards;
+        }
+        .reveal-right.revealed {
+            animation: revealRight 0.8s ease forwards;
+        }
+        @keyframes revealUp {
+            from {
+                opacity: 0;
+                transform: translateY(60px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        @keyframes revealLeft {
+            from {
+                opacity: 0;
+                transform: translateX(-60px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        @keyframes revealRight {
+            from {
+                opacity: 0;
+                transform: translateX(60px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width:1024px) {
+            .hero {
+                flex-direction: column;
+                text-align: center;
+                padding-top: 7rem;
+            }
+            .hero-content {
+                max-width: 100%;
+                flex-basis: auto;
+            }
+            .hero-sub {
+                margin: 0 auto 2.5rem;
+            }
+            .hero-cta,
+            .hero-stats {
+                justify-content: center;
+            }
+            .hero-logo-wrapper {
+                flex-basis: auto;
+                width: 100%;
+                margin-top: 1rem;
+                order: -1;
+            }
+            .hero-logo-container {
+                width: clamp(180px, 55vw, 400px);
+                height: clamp(180px, 55vw, 400px);
+                max-width: 70vw;
+                max-height: 70vw;
+            }
+            .nav {
+                padding: 0.55rem clamp(1rem, 3vw, 1.5rem);
+            }
+            .nav-links {
+                gap: 1rem;
+            }
+        }
+        @media (max-width:768px) {
+            .nav {
+                padding: 0.5rem 1rem;
+            }
+            .nav-links {
+                display: none;
+            }
+            .section {
+                padding: 5rem 1rem 3rem;
+            }
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+            .admin-panel {
+                width: 100%;
+                right: -100%;
+            }
+            .footer-content {
+                flex-direction: column;
+                text-align: center;
+            }
+            .youtube-banner {
+                flex-direction: column;
+                text-align: center;
+            }
+            .yt-content {
+                flex-direction: column;
+            }
+            .hero-logo-container {
+                width: clamp(160px, 60vw, 300px);
+                height: clamp(160px, 60vw, 300px);
+                max-width: 75vw;
+                max-height: 75vw;
+            }
+            .hero {
+                padding-top: 5rem;
+                gap: 0.5rem;
+            }
+            .recipes-grid {
+                grid-template-columns: 1fr;
+            }
+            .community-grid {
+                grid-template-columns: 1fr;
+            }
+            .hero-cta {
+                flex-direction: column;
+                align-items: center;
+            }
+            .hero-cta .btn {
+                width: 100%;
+                max-width: 300px;
+            }
+            .server-ip {
+                padding: 1rem 1.5rem;
+            }
+            .about-grid {
+                grid-template-columns: 1fr;
+            }
+            .footer-links a {
+                margin-left: 0.75rem;
+            }
+            .scroll-hint {
+                display: none;
+            }
+        }
+        @media (max-width:480px) {
+            .hero-logo-container {
+                width: clamp(140px, 65vw, 250px);
+                height: clamp(140px, 65vw, 250px);
+                max-width: 80vw;
+                max-height: 80vw;
+            }
+            .hero {
+                padding-top: 4rem;
+            }
+            .admin-btn {
+                padding: 0.4rem 0.7rem;
+                font-size: 0.75rem;
+                gap: 0.3rem;
+            }
+            .admin-btn svg {
+                width: 14px;
+                height: 14px;
+            }
+            .nav-logo span {
+                font-size: 0.65rem;
+            }
+            .craft-grid {
+                grid-template-columns: repeat(3, 32px);
+            }
+            .craft-slot {
+                width: 32px;
+                height: 32px;
+                font-size: 0.45rem;
+            }
+            .craft-result {
+                width: 48px;
+                height: 48px;
+                font-size: 1.2rem;
+            }
+            .recipe-craft {
+                gap: 0.5rem;
+            }
+            .craft-arrow {
+                font-size: 1.2rem;
+            }
+            .section-header h2 {
+                font-size: 1.6rem;
+            }
+            .title-line {
+                font-size: clamp(2.2rem, 10vw, 3rem);
+            }
+            .btn {
+                padding: 0.7rem 1.5rem;
+                font-size: 0.9rem;
+            }
+            .dev-grid {
+                grid-template-columns: 1fr;
+            }
+            .video-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        @media (max-width:360px) {
+            .hero-logo-container {
+                width: clamp(120px, 55vw, 200px);
+                height: clamp(120px, 55vw, 200px);
+                max-width: 70vw;
+                max-height: 70vw;
+            }
+            .hero {
+                padding-top: 3.5rem;
+            }
+            .nav {
+                padding: 0.4rem 0.6rem;
+            }
+            .nav-logo-icon {
+                width: 30px;
+                height: 30px;
+            }
+            .nav-logo span {
+                font-size: 0.6rem;
+            }
+            .admin-btn {
+                padding: 0.3rem 0.5rem;
+                font-size: 0.7rem;
+            }
+            .hero-badge {
+                font-size: 0.65rem;
+                padding: 0.3rem 0.8rem;
+            }
+            .hero-sub {
+                font-size: 0.9rem;
+            }
+            .stat-num {
+                font-size: 1.3rem;
+            }
+            .stat-label {
+                font-size: 0.7rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ===== LOADING SCREEN ===== -->
+    <div id="loader" class="loader">
+        <div class="loader-logo-wrapper">
+            <img src="logo.png" alt="Legend Craft Logo" class="loader-logo-img">
+        </div>
+        <div class="loader-text">Awakening the Dragon...</div>
+        <div class="loader-bar"><div class="loader-fill"></div></div>
+    </div>
+
+    <canvas id="bg-canvas"></canvas>
+    <div class="scroll-progress"></div>
+
+    <!-- ===== NAVIGATION ===== -->
+    <nav class="nav" id="nav">
+        <a href="#hero" class="nav-logo">
+            <div class="nav-logo-icon">
+                <img src="logo.png" alt="Legend Craft Logo">
+            </div>
+            <span>LEGEND CRAFT</span>
+        </a>
+        <div class="nav-links">
+            <a href="#about">About</a>
+            <a href="#videos">Videos</a>
+            <a href="#crafting">Crafting</a>
+            <a href="#community">Community</a>
+            <a href="#developers">Team</a>
+        </div>
+        <button class="admin-btn" id="adminBtn" title="Admin View">
+            <svg viewBox="0 0 24 24" width="18" height="18"><path fill="currentColor" d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm0 10.99h7c-.53 4.12-3.28 7.79-7 8.94V12H5V6.3l7-3.11v8.8z"/></svg>
+            Admin View
+        </button>
+    </nav>
+
+    <main>
+        <!-- ===== HERO ===== -->
+        <section id="hero" class="section hero">
+            <div class="hero-content">
+                <div class="hero-badge reveal-up">✦ NOW LIVE ✦</div>
+                <h1 class="hero-title">
+                    <span class="title-line reveal-up">LEGEND</span>
+                    <span class="title-line reveal-up title-accent">CRAFT</span>
+                </h1>
+                <p class="hero-sub reveal-up">Forge your legend in a world of custom crafting, epic quests, and endless adventure.</p>
+                <div class="hero-cta reveal-up">
+                    <a href="#crafting" class="btn btn-primary"><span>Explore Recipes</span></a>
+                    <a href="https://discord.gg/BZsHDJwpcF" target="_blank" rel="noopener" class="btn btn-secondary"><span>Join Discord</span></a>
+                </div>
+                <div class="hero-stats reveal-up">
+                    <div class="stat"><span class="stat-num" data-count="1000">0</span><span class="stat-label">Players</span></div>
+                    <div class="stat"><span class="stat-num" data-count="50">0</span><span class="stat-label">Custom Recipes</span></div>
+                    <div class="stat"><span class="stat-num" data-count="24" data-suffix="/7">0</span><span class="stat-label">Online</span></div>
+                </div>
+            </div>
+            <div class="hero-logo-wrapper">
+                <div class="hero-logo-container">
+                    <img src="logo.png" alt="Legend Craft Dragon Logo">
+                </div>
+            </div>
+            <div class="scroll-hint"><span>Scroll to explore</span><div class="scroll-arrow"></div></div>
+        </section>
+
+        <!-- ===== ABOUT ===== -->
+        <section id="about" class="section about">
+            <div class="section-header reveal-left"><span class="section-tag">// THE REALM</span><h2>Welcome to <span class="gradient-text">Legend Craft</span></h2><p>A handcrafted Minecraft experience where every block tells a story.</p></div>
+            <div class="about-grid">
+                <div class="about-card reveal-up" data-tilt><div class="card-icon">⚔️</div><h3>Legend Craft</h3><p>WHERE LEGENDS ARE FORGED, NOT BORN</p></div>
+                <div class="about-card reveal-up" data-tilt><div class="card-icon">🔮</div><h3>Custom Crafting</h3><p>Over 50 unique recipes you won't find anywhere else. Forge legendary weapons and artifacts.</p></div>
+                <div class="about-card reveal-up" data-tilt><div class="card-icon">🏰</div><h3>Thriving Economy</h3><p>Player shops, auctions, and a balanced economy that rewards creativity and dedication.</p></div>
+                <div class="about-card reveal-up" data-tilt><div class="card-icon">🐉</div><h3>Epic Adventures</h3><p>Custom dungeons to challenge even the bravest warriors.</p></div>
+            </div>
+            <div class="server-ip reveal-up"><span class="ip-label">SERVER IP</span><code class="ip-address" id="serverIp">legendcraft.minecra.fr</code><button class="copy-btn" id="copyIp" title="Copy IP">📋</button></div>
+        </section>
+
+        <!-- ===== VIDEOS ===== -->
+        <section id="videos" class="section videos">
+            <div class="section-header reveal-right"><span class="section-tag">// SHOWCASE</span><h2>Server <span class="gradient-text">Videos</span></h2><p>Watch epic moments, tutorials, and updates from our world.</p></div>
+            <div class="video-grid">
+                <div class="video-card reveal-up" data-tilt><div class="video-thumb"><div class="video-placeholder"><div class="play-btn">▶</div></div></div><h3>Server First Video</h3><p>🐖</p></div>
+                <div class="video-card reveal-up" data-tilt><div class="video-thumb"><div class="video-placeholder"><div class="play-btn">▶</div></div></div><h3>Custom Crafting Guide</h3><p>🐖</p></div>
+                <div class="video-card reveal-up" data-tilt><div class="video-thumb"><div class="video-placeholder"><div class="play-btn">▶</div></div></div><h3>About 6_sa</h3><p>🐖</p></div>
+            </div>
+            <div class="youtube-banner reveal-up"><div class="yt-content"><svg viewBox="0 0 24 24" width="48" height="48"><path fill="#ff0000" d="M23.5 6.2a3 3 0 0 0-2.1-2.1C19.5 3.5 12 3.5 12 3.5s-7.5 0-9.4.6A3 3 0 0 0 .5 6.2 31.6 31.6 0 0 0 0 12a31.6 31.6 0 0 0 .5 5.8 3 3 0 0 0 2.1 2.1c1.9.6 9.4.6 9.4.6s7.5 0 9.4-.6a3 3 0 0 0 2.1-2.1A31.6 31.6 0 0 0 24 12a31.6 31.6 0 0 0-.5-5.8z"/><path fill="#fff" d="M9.8 15.5V8.5l6.2 3.5z"/></svg><div><h3>Official YouTube Channel</h3><p>Subscribe for trailers, tutorials, and community highlights.</p></div></div><a href="https://www.youtube.com/@mksy1234-1/featured" target="_blank" rel="noopener" class="btn btn-primary"><span>Subscribe</span></a></div>
+        </section>
+
+        <!-- ===== CRAFTING ===== -->
+        <section id="crafting" class="section crafting">
+            <div class="section-header reveal-left"><span class="section-tag">// FORGE</span><h2>Custom <span class="gradient-text">Crafting</span></h2><p>Discover legendary recipes exclusive to Legend Craft.</p></div>
+            <div class="crafting-filters reveal-up"><button class="filter-btn active" data-filter="all">All</button><button class="filter-btn" data-filter="weapon">Weapons</button><button class="filter-btn" data-filter="armor">Armor</button><button class="filter-btn" data-filter="tool">Tools</button><button class="filter-btn" data-filter="special">Special</button></div>
+            <div class="recipes-grid" id="recipesGrid"></div>
+        </section>
+
+        <!-- ===== COMMUNITY ===== -->
+        <section id="community" class="section community">
+            <div class="section-header reveal-right"><span class="section-tag">// CONNECT</span><h2>Join the <span class="gradient-text">Community</span></h2><p>Connect with thousands of legends around the world.</p></div>
+            <div class="community-grid">
+                <a href="https://discord.gg/BZsHDJwpcF" target="_blank" rel="noopener" class="community-card discord-card reveal-up" data-tilt><div class="community-icon"><svg viewBox="0 0 24 24" width="64" height="64"><path fill="#5865F2" d="M20.3 4.4A18 18 0 0 0 15.7 3a13 13 0 0 0-.6 1.2 16.5 16.5 0 0 0-5 0A12 12 0 0 0 9.1 3 18 18 0 0 0 4.4 4.4 19.6 19.6 0 0 0 .1 16.4a18.5 18.5 0 0 0 5.7 2.9 14 14 0 0 0 1.2-2 12 12 0 0 1-1.9-.9l.5-.4a12.5 12.5 0 0 0 10.6 0l.5.4a12 12 0 0 1-1.9.9 14 14 0 0 0 1.2 2 18.5 18.5 0 0 0 5.7-2.9A19.6 19.6 0 0 0 23.9 8.5a18 18 0 0 0-3.6-4.1zM8.3 13.6c-1.1 0-2-.9-2-2.1s.9-2.1 2-2.1 2 .9 2 2.1-.9 2.1-2 2.1zm7.4 0c-1.1 0-2-.9-2-2.1s.9-2.1 2-2.1 2 .9 2 2.1-.9 2.1-2 2.1z"/></svg></div><h3>Discord Server</h3><p>Chat, get support, find parties, and stay updated on events.</p><span class="community-cta">Join Discord →</span></a>
+                <a href="https://www.youtube.com/@mksy1234-1/featured" target="_blank" rel="noopener" class="community-card youtube-card reveal-up" data-tilt><div class="community-icon"><svg viewBox="0 0 24 24" width="64" height="64"><path fill="#ff0000" d="M23.5 6.2a3 3 0 0 0-2.1-2.1C19.5 3.5 12 3.5 12 3.5s-7.5 0-9.4.6A3 3 0 0 0 .5 6.2 31.6 31.6 0 0 0 0 12a31.6 31.6 0 0 0 .5 5.8 3 3 0 0 0 2.1 2.1c1.9.6 9.4.6 9.4.6s7.5 0 9.4-.6a3 3 0 0 0 2.1-2.1A31.6 31.6 0 0 0 24 12a31.6 31.6 0 0 0-.5-5.8z"/><path fill="#fff" d="M9.8 15.5V8.5l6.2 3.5z"/></svg></div><h3>YouTube Channel</h3><p>Trailers, guides, boss fights, and community spotlights.</p><span class="community-cta">Watch Now →</span></a>
+            </div>
+        </section>
+
+        <!-- ===== DEVELOPERS ===== -->
+        <section id="developers" class="section developers">
+            <div class="section-header reveal-left"><span class="section-tag">// CREATORS</span><h2>Meet the <span class="gradient-text">Developers</span></h2><p>The legends behind the server and this website.</p></div>
+            <div class="dev-categories"><h3 class="dev-category-title reveal-up">🎮 Minecraft Server Team</h3><div class="dev-grid"><div class="dev-card reveal-up" data-tilt><div class="dev-avatar">👑</div><h4>1_SY</h4><span class="dev-role">Server Owner</span><p>The One behind Legend Craft's world and custom plugins.</p></div><div class="dev-card reveal-up" data-tilt><div class="dev-avatar">⚡</div><h4>Greatnes</h4><span class="dev-role">Lead Developer</span><p>Custom crafting systems, economy, and quest mechanics.</p></div><div class="dev-card reveal-up" data-tilt><div class="dev-avatar">🏗️</div><h4>1AED</h4><span class="dev-role">World Builder</span><p>Epic spawn, Builds, and every block placed with love.</p></div></div><h3 class="dev-category-title reveal-up">💻 Website Team</h3><div class="dev-grid"><div class="dev-card reveal-up" data-tilt><div class="dev-avatar">🎨</div><h4>6_sa</h4><span class="dev-role">UI/UX Designer</span><p>Crafted the visual identity and 3D experience you see here.</p></div><div class="dev-card reveal-up" data-tilt><div class="dev-avatar">⚙️</div><h4>6_sa</h4><span class="dev-role">Web Developer</span><p>Built the animations, crafting editor, and admin systems.</p></div></div></div>
+        </section>
+    </main>
+
+    <!-- ===== FOOTER ===== -->
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-brand">
+                <div class="footer-logo-icon">
+                    <img src="logo.png" alt="Legend Craft Logo">
+                </div>
+                <span>LEGEND CRAFT</span>
+            </div>
+            <p class="footer-copy">© 2026 Legend Craft. Not affiliated with Mojang Studios.</p>
+            <div class="footer-links"><a href="https://discord.gg/BZsHDJwpcF" target="_blank" rel="noopener">Discord</a><a href="https://www.youtube.com/@mksy1234-1/featured" target="_blank" rel="noopener">YouTube</a></div>
+        </div>
+    </footer>
+
+    <!-- ===== MODALS ===== -->
+    <div class="modal-overlay" id="adminModal">
+        <div class="modal"><button class="modal-close" id="closeAdminModal">&times;</button>
+            <div class="modal-dragon-icon">
+                <img src="logo.png" alt="Legend Craft Logo">
+            </div>
+            <h2>Admin Access</h2><p>Enter credentials to manage custom crafting recipes.</p>
+            <form id="adminLoginForm"><div class="form-group"><label for="adminUser">Username</label><input type="text" id="adminUser" placeholder="Enter username" autocomplete="username" required /></div><div class="form-group"><label for="adminPass">Password</label><input type="password" id="adminPass" placeholder="Enter password" autocomplete="current-password" required /></div><p class="login-error" id="loginError"></p><button type="submit" class="btn btn-primary btn-full">Access Editor</button></form>
+        </div>
+    </div>
+
+    <div class="admin-panel" id="adminPanel"><div class="admin-panel-header"><h2>⚒️ Crafting Editor</h2><div class="admin-panel-actions"><button class="btn btn-primary btn-sm" id="addRecipeBtn">+ Add Recipe</button><button class="btn btn-secondary btn-sm" id="exitAdminBtn">Exit Admin</button></div></div><div class="admin-recipes-list" id="adminRecipesList"></div></div>
+
+    <div class="modal-overlay" id="recipeModal"><div class="modal recipe-edit-modal"><button class="modal-close" id="closeRecipeModal">&times;</button><h2 id="recipeModalTitle">Add Recipe</h2><form id="recipeForm"><input type="hidden" id="recipeId" /><div class="form-row"><div class="form-group"><label for="recipeName">Recipe Name</label><input type="text" id="recipeName" required placeholder="e.g. Dragon Blade" /></div><div class="form-group"><label for="recipeCategory">Category</label><select id="recipeCategory"><option value="weapon">Weapon</option><option value="armor">Armor</option><option value="tool">Tool</option><option value="special">Special</option></select></div></div><div class="form-group"><label for="recipeDesc">Description</label><input type="text" id="recipeDesc" placeholder="Brief description" /></div><div class="form-group"><label for="recipeIcon">Icon (emoji)</label><input type="text" id="recipeIcon" placeholder="⚔️" maxlength="4" /></div><div class="form-group"><label>Crafting Grid (3×3)</label><div class="craft-grid-editor" id="craftGridEditor"><input type="text" class="grid-slot" data-slot="0" placeholder="·" maxlength="12" /><input type="text" class="grid-slot" data-slot="1" placeholder="·" maxlength="12" /><input type="text" class="grid-slot" data-slot="2" placeholder="·" maxlength="12" /><input type="text" class="grid-slot" data-slot="3" placeholder="·" maxlength="12" /><input type="text" class="grid-slot" data-slot="4" placeholder="·" maxlength="12" /><input type="text" class="grid-slot" data-slot="5" placeholder="·" maxlength="12" /><input type="text" class="grid-slot" data-slot="6" placeholder="·" maxlength="12" /><input type="text" class="grid-slot" data-slot="7" placeholder="·" maxlength="12" /><input type="text" class="grid-slot" data-slot="8" placeholder="·" maxlength="12" /></div><small class="form-hint">Enter material names. Leave empty for blank slots.</small></div><div class="form-group"><label for="recipeResult">Result Item</label><input type="text" id="recipeResult" required placeholder="e.g. Dragon Blade" /></div><div class="form-actions"><button type="button" class="btn btn-secondary" id="cancelRecipeBtn">Cancel</button><button type="submit" class="btn btn-primary">Save Recipe</button></div></form></div></div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js">
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js">
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js">
+    </script>
+    <script>
+        const DEFAULT_RECIPES = [{ id: 'dragon-blade', name: 'Dragon Blade', category: 'weapon', icon: '⚔️',
+            description: 'A legendary sword forged with the essence of the Ender Dragon.',
+            grid: ['', 'Ender Pearl', '', 'Diamond', 'Netherite', 'Diamond', '', 'Blaze Rod', ''],
+            result: 'Dragon Blade' }, { id: 'ender-crown', name: 'Ender Crown', category: 'armor', icon: '👑',
+            description: 'Grants night vision and resistance to endermen aggression.',
+            grid: ['Ender Pearl', 'Amethyst', 'Ender Pearl', 'Diamond', '', 'Diamond', '', '', ''],
+            result: 'Ender Crown' }, { id: 'legend-pickaxe', name: 'Legend Pickaxe', category: 'tool', icon: '⛏️',
+            description: 'Mines 3×3 areas and has unbreaking V enchantment built-in.',
+            grid: ['Diamond', 'Diamond', 'Diamond', '', 'Stick', '', '', 'Stick', ''],
+            result: 'Legend Pick' }, { id: 'void-compass', name: 'Void Compass', category: 'special', icon: '🧭',
+            description: 'Points to the nearest legendary dungeon entrance.',
+            grid: ['', 'Ender Eye', '', 'Ender Eye', 'Compass', 'Ender Eye', '', 'Ender Eye', ''],
+            result: 'Void Compass' }, { id: 'dragon-scale', name: 'Dragon Scale Armor', category: 'armor', icon: '🛡️',
+            description: 'Purple armor set with fire resistance and knockback immunity.',
+            grid: ['Scale', 'Scale', 'Scale', 'Scale', '', 'Scale', 'Scale', 'Scale', 'Scale'],
+            result: 'Dragon Chestplate' }, { id: 'legend-bow', name: 'Legend Bow', category: 'weapon', icon: '🏹',
+            description: 'Shoots explosive arrows that deal dragon breath damage.',
+            grid: ['', 'String', 'Blaze Rod', 'String', '', 'String', '', 'String', 'Blaze Rod'],
+            result: 'Legend Bow' }];
+        const STORAGE_KEY = 'legendcraft_recipes';
+
+        function getRecipes() { const s = localStorage.getItem(STORAGE_KEY); if (s) { try { return JSON.parse(
+            s); } catch { return [...DEFAULT_RECIPES]; } } return [...DEFAULT_RECIPES]; }
+
+        function saveRecipes(r) { localStorage.setItem(STORAGE_KEY, JSON.stringify(r)); }
+
+        function generateId(n) { return n.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') + '-' + Date
+        .now().toString(36); }
+
+        function renderCraftGrid(g) { return g.map(s => { const f = s && s.trim() !== ''; return `<div class="craft-slot ${f ? 'filled' : ''}">${f ? s : ''}</div>`; }).join(''); }
+
+        function renderRecipeCard(r, i) { return `<div class="recipe-card" data-category="${r.category}" style="animation-delay:${i*0.1}s"><div class="recipe-header"><div class="recipe-icon">${r.icon||'🔮'}</div><div class="recipe-info"><h3>${r.name}</h3><span class="recipe-category">${r.category}</span></div></div><p class="recipe-desc">${r.description||''}</p><div class="recipe-craft"><div class="craft-grid">${renderCraftGrid(r.grid)}</div><span class="craft-arrow">→</span><div class="craft-result">${r.icon||'🔮'}<span>${r.result}</span></div></div></div>`; }
+
+        function renderRecipes(filter = 'all') { const g = document.getElementById('recipesGrid'); if (!g)
+        return; const recipes = getRecipes(); const f = filter === 'all' ? recipes : recipes.filter(r => r
+            .category === filter); if (f.length === 0) { g.innerHTML =
+            '<p style="text-align:center;color:var(--text-secondary);grid-column:1/-1;opacity:0.7;">No recipes found.</p>'; return; }
+        g.innerHTML = f.map((r, i) => renderRecipeCard(r, i)).join(''); }
+
+        function initCraftingFilters() { document.querySelectorAll('.filter-btn').forEach(b => { b.addEventListener(
+            'click', () => { document.querySelectorAll('.filter-btn').forEach(x => x.classList.remove(
+                    'active'));
+                b.classList.add('active');
+                renderRecipes(b.dataset.filter); }); }); }
+        window.CraftingAPI = { getRecipes, saveRecipes, generateId, renderRecipes, DEFAULT_RECIPES };
+    </script>
+    <script>
+        const ADMIN_CREDENTIALS = { username: 'immortal_dictator', password: 'Rj(/ZzW+k_X.]VKv71+4zK@C9d1l&6gJG' };
+        let isAdminLoggedIn = false;
+
+        function checkAdminSession() { return sessionStorage.getItem('lc_admin') === 'true'; }
+
+        function setAdminSession(a) { if (a) { sessionStorage.setItem('lc_admin', 'true'); } else { sessionStorage
+                .removeItem('lc_admin'); }
+            isAdminLoggedIn = a;
+            document.body.classList.toggle('admin-mode', a); const p = document.getElementById('adminPanel'); if (p) p
+                .classList.toggle('active', a); if (a) renderAdminList(); }
+
+        function openModal(id) { document.getElementById(id)?.classList.add('active'); }
+
+        function closeModal(id) { document.getElementById(id)?.classList.remove('active'); }
+
+        function renderAdminList() { const l = document.getElementById('adminRecipesList'); if (!l)
+        return; const recipes = CraftingAPI.getRecipes(); if (recipes.length === 0) { l.innerHTML =
+            '<p style="text-align:center;color:var(--text-secondary);opacity:0.7;padding:2rem;">No recipes yet.</p>'; return; }
+        l.innerHTML = recipes.map(r => `
+        <div class="admin-recipe-item" data-id="${r.id}"><div class="admin-recipe-info"><span>${r.icon||'🔮'}</span><div><h4>${r.name}</h4><small>${r.category}</small></div></div><div class="admin-recipe-actions"><button class="btn-edit" data-action="edit" data-id="${r.id}">Edit</button><button class="btn-delete" data-action="delete" data-id="${r.id}">Delete</button></div></div>`).join(''); l.querySelectorAll('[data-action]').forEach(b => { b.addEventListener('click', () => { const id = b.dataset.id; if (b.dataset.action === 'edit') openRecipeEditor(id); if (b.dataset.action === 'delete') deleteRecipe(id); }); }); }
+
+        function openRecipeEditor(id) { const f = document.getElementById('recipeForm'); const t = document
+            .getElementById('recipeModalTitle');
+            f.reset();
+            document.querySelectorAll('.grid-slot').forEach(s => s.value = ''); if (id) { const r = CraftingAPI
+                    .getRecipes().find(x => x.id === id); if (!r) return;
+                t.textContent = 'Edit Recipe';
+                document.getElementById('recipeId').value = r.id;
+                document.getElementById('recipeName').value = r.name;
+                document.getElementById('recipeCategory').value = r.category;
+                document.getElementById('recipeDesc').value = r.description || '';
+                document.getElementById('recipeIcon').value = r.icon || '';
+                document.getElementById('recipeResult').value = r.result;
+                r.grid.forEach((v, i) => { const s = document.querySelector(`.grid-slot[data-slot="${i}"]`); if (
+                    s) s.value = v; }); } else { t.textContent = 'Add Recipe';
+                document.getElementById('recipeId').value = ''; }
+            openModal('recipeModal'); }
+
+        function deleteRecipe(id) { if (!confirm('Delete this recipe?')) return; const recipes = CraftingAPI.getRecipes()
+                .filter(r => r.id !== id);
+            CraftingAPI.saveRecipes(recipes);
+            CraftingAPI.renderRecipes(document.querySelector('.filter-btn.active')?.dataset.filter || 'all');
+            renderAdminList(); }
+
+        function saveRecipeFromForm(e) { e.preventDefault(); const grid = [];
+            document.querySelectorAll('.grid-slot').forEach(s => grid.push(s.value.trim())); const d = { name: document
+                    .getElementById('recipeName').value.trim(), category: document.getElementById('recipeCategory')
+                    .value, description: document.getElementById('recipeDesc').value.trim(), icon: document
+                    .getElementById('recipeIcon').value.trim() || '🔮', grid, result: document.getElementById(
+                        'recipeResult').value.trim() }; let recipes = CraftingAPI.getRecipes(); const eid = document
+                .getElementById('recipeId').value; if (eid) { recipes = recipes.map(r => r.id === eid ? { ...r,
+                    ...d } : r); } else { recipes.push({ id: CraftingAPI.generateId(d.name), ...d }); }
+            CraftingAPI.saveRecipes(recipes);
+            CraftingAPI.renderRecipes(document.querySelector('.filter-btn.active')?.dataset.filter || 'all');
+            renderAdminList();
+            closeModal('recipeModal'); }
+
+        function initAdmin() { const ab = document.getElementById('adminBtn'); const lf = document.getElementById(
+                'adminLoginForm'); const eb = document.getElementById('exitAdminBtn'); const addB = document
+                .getElementById('addRecipeBtn'); const rf = document.getElementById('recipeForm'); if (
+                checkAdminSession()) setAdminSession(true);
+            ab?.addEventListener('click', () => { if (isAdminLoggedIn) { setAdminSession(false); } else { openModal(
+                        'adminModal');
+                    document.getElementById('loginError').textContent = ''; } });
+            document.getElementById('closeAdminModal')?.addEventListener('click', () => closeModal('adminModal'));
+            document.getElementById('closeRecipeModal')?.addEventListener('click', () => closeModal('recipeModal'));
+            document.getElementById('cancelRecipeBtn')?.addEventListener('click', () => closeModal('recipeModal'));
+            document.getElementById('adminModal')?.addEventListener('click', (ev) => { if (ev.target === document
+                    .getElementById('adminModal')) closeModal('adminModal'); });
+            document.getElementById('recipeModal')?.addEventListener('click', (ev) => { if (ev.target.id ===
+                    'recipeModal') closeModal('recipeModal'); });
+            lf?.addEventListener('submit', (ev) => { ev.preventDefault(); const u = document.getElementById(
+                        'adminUser').value.trim(); const p = document.getElementById('adminPass').value; const er =
+                    document.getElementById('loginError'); if (u === ADMIN_CREDENTIALS.username && p ===
+                    ADMIN_CREDENTIALS.password) { setAdminSession(true);
+                    closeModal('adminModal');
+                    lf.reset();
+                    er.textContent = ''; } else { er.textContent = 'Invalid credentials.'; if (typeof gsap !==
+                        'undefined') gsap.fromTo(er, { x: -10 }, { x: 10, duration: 0.05, repeat: 5,
+                        yoyo: true }); } });
+            eb?.addEventListener('click', () => setAdminSession(false));
+            addB?.addEventListener('click', () => openRecipeEditor(null));
+            rf?.addEventListener('submit', saveRecipeFromForm); }
+        document.addEventListener('DOMContentLoaded', initAdmin);
+    </script>
+    <script>
+        let scene, camera, renderer, particles,
+            blocks = [];
+        let mouseX = 0,
+            mouseY = 0,
+            scrollY = 0;
+
+        function initThreeScene() { const c = document.getElementById('bg-canvas'); if (!c || typeof THREE ===
+            'undefined') return;
+            scene = new THREE.Scene();
+            scene.fog = new THREE.FogExp2(0x090909, 0.0007);
+            camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+            camera.position.z = 50;
+            renderer = new THREE.WebGLRenderer({ canvas: c, alpha: true, antialias: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+            createParticleField();
+            createFloatingBlocks();
+            createDragonParticles();
+            window.addEventListener('resize', onResize);
+            document.addEventListener('mousemove', onMouseMove);
+            window.addEventListener('scroll', () => { scrollY = window.scrollY; });
+            animate(); }
+
+        function createParticleField() { const cnt = 3000; const g = new THREE.BufferGeometry(); const p = new Float32Array(
+                cnt * 3); const cl = new Float32Array(cnt * 3); const red = new THREE.Color(0xb00020); const br =
+            new THREE.Color(0xff2d2d); const or = new THREE.Color(0xff5e00); const dr = new THREE.Color(0x4a0000); for (
+                let i = 0; i < cnt; i++) { p[i * 3] = (Math.random() - 0.5) * 200;
+            p[i * 3 + 1] = (Math.random() - 0.5) * 200;
+            p[i * 3 + 2] = (Math.random() - 0.5) * 200; const col = [red, br, or, dr][Math.floor(Math.random() * 4)];
+            cl[i * 3] = col.r;
+            cl[i * 3 + 1] = col.g;
+            cl[i * 3 + 2] = col.b; }
+        g.setAttribute('position', new THREE.BufferAttribute(p, 3));
+            g.setAttribute('color', new THREE.BufferAttribute(cl, 3)); const m = new THREE.PointsMaterial({ size: 0.7,
+                vertexColors: true, transparent: true, opacity: 0.75, blending: THREE.AdditiveBlending,
+                sizeAttenuation: true });
+            particles = new THREE.Points(g, m);
+            scene.add(particles); }
+
+        function createFloatingBlocks() { const bc = [0xb00020, 0xff2d2d, 0x8b0000, 0xff4444, 0x4a0000,
+        0xff5e00]; const cnt = 25; for (let i = 0; i < cnt; i++) { const sz = Math.random() * 2 + 1; const g =
+            new THREE.BoxGeometry(sz, sz, sz); const m = new THREE.MeshPhongMaterial({ color: bc[Math.floor(Math
+                    .random() * bc.length)], transparent: true, opacity: 0.55, shininess: 80,
+            emissive: 0x3a0000, emissiveIntensity: 0.3 }); const b = new THREE.Mesh(g, m);
+        b.position.set((Math.random() - 0.5) * 120, (Math.random() - 0.5) * 80, (Math.random() - 0.5) * 60 - 20);
+            b.rotation.set(Math.random() * Math.PI, Math.random() * Math.PI, Math.random() * Math.PI);
+            b.userData = { rotSpeed: { x: (Math.random() - 0.5) * 0.02, y: (Math.random() - 0.5) * 0.02, z: (Math.random() -
+                    0.5) * 0.02 }, floatSpeed: Math.random() * 0.5 + 0.3, floatOffset: Math.random() * Math.PI * 2,
+                baseY: b.position.y };
+            blocks.push(b);
+            scene.add(b); } const al = new THREE.AmbientLight(0x3a0000, 0.5);
+            scene.add(al); const pl = new THREE.PointLight(0xff2d2d, 2, 200);
+            pl.position.set(0, 20, 30);
+            scene.add(pl); const pl2 = new THREE.PointLight(0xff5e00, 1.5, 150);
+            pl2.position.set(-30, -10, 20);
+            scene.add(pl2); }
+
+        function createDragonParticles() { const cnt = 200; const g = new THREE.BufferGeometry(); const p = new Float32Array(
+                cnt * 3); for (let i = 0; i < cnt; i++) { const a = (i / cnt) * Math.PI * 2; const r = 25 + Math.sin(i *
+                0.5) * 5;
+            p[i * 3] = Math.cos(a) * r;
+            p[i * 3 + 1] = Math.sin(a * 3) * 8;
+            p[i * 3 + 2] = Math.sin(a) * r; }
+        g.setAttribute('position', new THREE.BufferAttribute(p, 3)); const m = new THREE.PointsMaterial({ size: 1.2,
+            color: 0xff4444, transparent: true, opacity: 0.5, blending: THREE.AdditiveBlending }); const ring =
+            new THREE.Points(g, m);
+            ring.userData.isRing = true;
+            scene.add(ring);
+            blocks.push(ring); }
+
+        function onResize() { if (!camera || !renderer) return;
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight); }
+
+        function onMouseMove(e) { mouseX = (e.clientX / window.innerWidth - 0.5) * 2;
+            mouseY = (e.clientY / window.innerHeight - 0.5) * 2; }
+
+        function animate() { requestAnimationFrame(animate); const t = Date.now() * 0.001; if (particles) { particles
+                .rotation.y = t * 0.05;
+            particles.rotation.x = Math.sin(t * 0.1) * 0.1; const pos = particles.geometry.attributes.position
+                .array; for (let i = 0; i < pos.length; i += 3) { pos[i + 1] += Math.sin(t + i) * 0.01; }
+            particles.geometry.attributes.position.needsUpdate = true; }
+        blocks.forEach(b => { if (b.userData.isRing) { b.rotation.y = t * 0.3;
+                b.rotation.z = Math.sin(t * 0.5) * 0.2; return; }
+            b.rotation.x += b.userData.rotSpeed.x;
+            b.rotation.y += b.userData.rotSpeed.y;
+            b.rotation.z += b.userData.rotSpeed.z;
+            b.position.y = b.userData.baseY + Math.sin(t * b.userData.floatSpeed + b.userData.floatOffset) * 3; });
+            camera.position.x += (mouseX * 15 - camera.position.x) * 0.05;
+            camera.position.y += (-mouseY * 10 + scrollY * -0.02 - camera.position.y) * 0.05;
+            camera.lookAt(0, scrollY * -0.01, 0);
+            renderer.render(scene, camera); }
+        document.addEventListener('DOMContentLoaded', initThreeScene);
+    </script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => { initLoader();
+            initScrollAnimations();
+            initNav();
+            initTilt();
+            initCounters();
+            initCopyIp();
+            CraftingAPI.renderRecipes();
+            initCraftingFilters(); });
+
+        function initLoader() { const l = document.getElementById('loader');
+            setTimeout(() => { l.classList.add('hidden');
+                triggerHeroAnimations(); }, 2600); }
+
+        function triggerHeroAnimations() { document.querySelectorAll('.hero .reveal-up').forEach((el, i) => { setTimeout(
+                    () => el.classList.add('revealed'), i * 150); }); }
+
+        function initScrollAnimations() { if (typeof gsap === 'undefined' || typeof ScrollTrigger ===
+            'undefined') { fallbackReveal(); return; }
+            gsap.registerPlugin(ScrollTrigger); const pb = document.querySelector('.scroll-progress');
+            ScrollTrigger.create({ start: 0, end: 'max', onUpdate: (s) => { if (pb) pb.style.width = `${s.progress*100}%`; } });
+            gsap.utils.toArray('.reveal-up, .reveal-left, .reveal-right').forEach(el => { if (el.closest('.hero'))
+            return; const a = el.classList.contains('reveal-left') ? { x: -80, opacity: 0 } : el.classList
+                    .contains('reveal-right') ? { x: 80, opacity: 0 } : { y: 80, opacity: 0 };
+                gsap.fromTo(el, a, { ...Object.fromEntries(Object.entries(a).map(([k, v]) => [k, k === 'opacity' ? 1 :
+                        0
+                    ])), duration: 1, ease: 'power3.out', scrollTrigger: { trigger: el, start: 'top 85%',
+                    toggleActions: 'play none none reverse' } }); });
+            gsap.to('.hero-logo-container', { scrollTrigger: { trigger: '#hero', start: 'top top', end: 'bottom top',
+                    scrub: 1.5 }, y: 190, scale: 0.5, opacity: 0.2, ease: 'none' });
+            gsap.to('.hero-content', { scrollTrigger: { trigger: '#hero', start: 'top top', end: 'bottom top',
+                scrub: 1 }, y: -100, opacity: 0.2, ease: 'none' }); ['#about', '#videos', '#crafting', '#community', '#developers'].forEach(id => { const s = document.querySelector(id); if (!s) return;
+                gsap.fromTo(s, { rotateX: 5, z: -100, opacity: 0.5 }, { rotateX: 0, z: 0, opacity: 1,
+                    ease: 'power2.out', scrollTrigger: { trigger: s, start: 'top 80%', end: 'top 20%',
+                        scrub: 1.2 } }); });
+            gsap.utils.toArray('.about-card, .video-card, .recipe-card, .community-card, .dev-card').forEach((c,
+            i) => { gsap.fromTo(c, { rotateY: i % 2 === 0 ? -15 : 15, z: -50, opacity: 0 }, { rotateY: 0,
+                    z: 0, opacity: 1, duration: 0.8, ease: 'power3.out', scrollTrigger: { trigger: c,
+                        start: 'top 90%', toggleActions: 'play none none reverse' } }); });
+            gsap.to('.section-header', { scrollTrigger: { trigger: '.section-header', start: 'top 80%', end: 'top 30%',
+                    scrub: 1 }, y: -30, ease: 'none' }); }
+
+        function fallbackReveal() { const o = new IntersectionObserver((e) => { e.forEach(en => { if (en.isIntersecting) en
+                    .target.classList.add('revealed'); }); }, { threshold: 0.15 });
+            document.querySelectorAll('.reveal-up, .reveal-left, .reveal-right').forEach(el => { if (!el.closest(
+                '.hero')) o.observe(el); }); }
+
+        function initNav() { const n = document.getElementById('nav'); let ls = 0;
+            window.addEventListener('scroll', () => { const c = window.scrollY;
+                n.classList.toggle('scrolled', c > 50); if (c > ls && c > 200) { n.style.transform =
+                    'translateY(-100%)'; } else { n.style.transform = 'translateY(0)'; }
+                ls = c; });
+            document.querySelectorAll('.nav-links a').forEach(l => { l.addEventListener('click', (e) => { e
+                    .preventDefault(); const t = document.querySelector(l.getAttribute('href')); if (t) t
+                    .scrollIntoView({ behavior: 'smooth' }); }); }); }
+
+        function initTilt() { document.querySelectorAll('[data-tilt]').forEach(c => { c.addEventListener('mousemove', (
+                e) => { const r = c.getBoundingClientRect(); const x = (e.clientX - r.left) / r.width - 0.5; const
+                    y = (e.clientY - r.top) / r.height - 0.5;
+                c.style.transform =
+                    `perspective(800px) rotateY(${x*12}deg) rotateX(${-y*12}deg) translateY(-8px)`; });
+                c.addEventListener('mouseleave', () => { c.style.transform = ''; }); }); }
+
+        function initCounters() { const cs = document.querySelectorAll('.stat-num[data-count]'); let a = false; const o =
+            new IntersectionObserver((e) => { e.forEach(en => { if (en.isIntersecting && !a) { a =
+                    true;
+                    cs.forEach(c => { const t = parseInt(c.dataset.count, 10); const sf = c.dataset
+                        .suffix || '+'; let cur = 0; const st = t / 60; const tk = () => { cur +=
+                            st; if (cur >= t) { c.textContent = t + sf; } else { c
+                                .textContent = Math.floor(cur) + sf;
+                            requestAnimationFrame(tk); } };
+                        tk(); }); } }); }, { threshold: 0.5 }); const se = document.querySelector('.hero-stats'); if (se) o
+                .observe(se); }
+
+        function initCopyIp() { const b = document.getElementById('copyIp'); const ip = document.getElementById(
+            'serverIp'); if (!b || !ip) return;
+            b.addEventListener('click', async () => { try { await navigator.clipboard.writeText(ip.textContent);
+                    b.textContent = '✓';
+                    setTimeout(() => { b.textContent = '📋'; }, 2000); } catch { b.textContent = '!';
+                    setTimeout(() => { b.textContent = '📋'; }, 2000); } }); }
+    </script>
+</body>
+</html>

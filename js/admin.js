@@ -1,6 +1,6 @@
 const ADMIN_CREDENTIALS = {
-  username: 'immortal_dictator',
-  password: 'Rj(/ZzW+k_X.]VKv71+4zK@C9d1l&6gJG'
+  username: 'Legendcraft',
+  password: 'Legendcraft'
 };
 
 let isAdminLoggedIn = false;
